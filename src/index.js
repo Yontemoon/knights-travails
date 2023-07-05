@@ -58,17 +58,48 @@ function isWithinBoard(array, target){
         return true;
 }
 
+function constructPath (board, infoArr, item, index, newArray) {
+    if (item.predecessor === null) return;
+    if (item.predecessor !== null) {
+        newArray.push(board[index]);
+        constructPath(board, infoArr, infoArr[item.predecessor], item.predecessor, newArray);
+    }
+}
+
 
 function knightsMove(start, end) {
     const board = chessBoard(); // returns array 8x8
-    console.log(board)
     const startIndex = findIndex(start, board); // 0
     const endIndex = findIndex(end, board); // 17
-    const buildArray = buildObjArray(board, startIndex);
+    const buildInfo = buildObjArray(board, startIndex);
     const adjacentList = buildAdjacentList(board);
+    console.log(adjacentList)
     let queue = [startIndex];
     let current;
-    
+    let distanceTicker = 0;
+    while (current !== endIndex) {
+        current = queue.shift(); // current is now "0" and dequeue'd it from the queue.
+        distanceTicker++;
+        for (let i = 0; i < adjacentList[current].length; i++) {
+            let vIndex = adjacentList[current][i];
+            console.log(vIndex)
+            if (buildInfo[vIndex].distance === null) {
+                buildInfo[vIndex].distance = distanceTicker;
+                buildInfo[vIndex].predecessor = current;
+                queue.push(vIndex);
+            } else if (vIndex === endIndex) { 
+                buildInfo[vIndex].predecessor = current;
+                let path = [];
+                constructPath (board, buildInfo, buildInfo[vIndex], vIndex, path);
+                let result = path.reverse().splice(0,0,start);
+                console.log(`You made it in ${path.length - 1} moves! Here's your path:`)
+                return path;
+            } else {
+                continue;
+            }
+        }
+
+    }
 }
 
-console.log(knightsMove([0,0], [2,1]))
+console.log(knightsMove([3,3], [4,3]))
